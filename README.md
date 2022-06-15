@@ -9,3 +9,6 @@ In this code we will learn how to
 5. Find 95% confidence interval for the angle of the ideal vector using bootstrap method
 6. Recommend to Infinity's managers what they should do to improve their product design
 
+
+Please chekout the pdf for outputs
+
