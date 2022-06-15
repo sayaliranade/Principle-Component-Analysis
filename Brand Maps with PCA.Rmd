@@ -1,16 +1,13 @@
 ---
-title: "HW3_SR_442"
+title: "Brand Maps with PCA"
 author: "Sayali Ranade"
 date: "2/7/2022"
 output: html_document
 ---
 \
-**1. Build brand maps for car brands using Cars_Data.xlsx. The client's brand is Infinity.**\
+**1. Build brand maps for car brands for the client's brand - Infinity.**\
 \
 ```{r}
-
-setwd("C:/Users/ranad/Desktop/Winter 2022/442/Homework 3/")
-rm(list=ls(all=TRUE))
 
 cars <- read.csv("Cars_Data.csv", header=T)
 
@@ -37,7 +34,7 @@ nn <- nrow(as.matrix(ego))					# number of factors to retain
 print(paste("Factors to retain : ", nn))
 ```
 \
-**3. Assign names to the retained factors (you may need to flip the factors and then assign names)**\
+**3. Assign names to the retained factors**\
 \
 ```{r}
 
@@ -80,17 +77,7 @@ Z2 - Unreliable \
 Z3 - Value for Money \
 \
 \
-**4. Explain iso-preference line and its difference from the regression line**\
-\
-All brands on the iso-preference line have the same preference i.e. all brands satisfy the preference.\
-In case of regression line, the all brands on the same line won't have the same outcome. It will depend on y-axis.\
-\
-**5. Explain what is an ideal vector and why it indicates the direction of increasing preferences?**\
-\
-Ideal vector is the line perpendicular to iso-preference line. It indicates the direction in which the brand should move to differentiate itself from it's nearest competitors.\
-Assuming that all betas are positive, brands to the right of iso-preference line are more preferred and ideal vector is perpendicular to the line so it indicates the direction of increasing preferences.
-\
-**6. Compute the angles of iso-preference line and ideal vector arrow**\
+**4. Compute the angles of iso-preference line and ideal vector arrow**\
 \
 # Brand Maps\
 \
@@ -173,7 +160,7 @@ print(paste("angle.iso.preference : ", angle.iso.preference))
 print(paste("angle.ideal.vector : ", angle.ideal.vector))
 ```
 \
-**7. Find 95% confidence interval for the angle of the ideal vector. Use data bootstrap method we learnt in Class 3.**\
+**5. Find 95% confidence interval for the angle of the ideal vector using data bootstrap**\
 \
 ```{r}
 angle <- list()
@@ -249,7 +236,7 @@ for (i in 1:ncol(df)){
 
 ```
 \
-**8. Recommend to Infinity's managers what they should do to improve their product design**\
+**6. Recommend to Infinity's managers what they should do to improve their product design**\
 We got three brand maps -\
 1. Premium vs unreliable - In this brand map, BMW is infinity's close competitor - with ideal vector at 22 degrees which leans towards premium feature.\
 Thus, infinity should work on premium cars which are attractive and well built.\
