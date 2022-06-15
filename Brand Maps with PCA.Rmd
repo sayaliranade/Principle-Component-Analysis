@@ -1,0 +1,259 @@
+---
+title: "HW3_SR_442"
+author: "Sayali Ranade"
+date: "2/7/2022"
+output: html_document
+---
+\
+**1. Build brand maps for car brands using Cars_Data.xlsx. The client's brand is Infinity.**\
+\
+```{r}
+
+setwd("C:/Users/ranad/Desktop/Winter 2022/442/Homework 3/")
+rm(list=ls(all=TRUE))
+
+cars <- read.csv("Cars_Data.csv", header=T)
+
+y <-  cars[,17]
+x <-  as.matrix(cars[,2:16])
+data <- cbind(y,x)
+cor_mat = cor(x)
+
+out1 <-  eigen(cor_mat)	# eigen decomposition of correlation matrix
+va <-  out1$values			# eigenvalues
+ve <-  out1$vectors		# eigenvector
+
+```
+\
+**2. Determine how many factors to retain?** \
+\
+```{r}
+# scree plot
+plot(va, ylab = "Eigenvalues", xlab = "Component Nos")
+
+ego <- va[va > 1]							# eigenvalues > 1
+nn <- nrow(as.matrix(ego))					# number of factors to retain
+
+print(paste("Factors to retain : ", nn))
+```
+\
+**3. Assign names to the retained factors (you may need to flip the factors and then assign names)**\
+\
+```{r}
+
+out2 <- ve[,1:nn]							# eigenvectors associated with the retained factors
+out3 <- ifelse(abs(out2) < 0.3, 0, out2)		# ignore small values < 0.3
+
+rownames(out3) <- c("Attractive", "Quiet", "Unreliable", "Poorly.Built", "Interesting", "Sporty", "Uncomfortable", "Roomy", 
+                    "Easy.Service", "Prestige", "Common", "Economical", "Successful", "AvantGarde", "Poor.Value")
+
+z = x %*% out3			# Component Scores; coordinates of the brands in the map
+
+pref_reg = lm(y ~ z)		# Preference Regression to estimate how benefits drive overall preferences = f(benefits)
+
+summary(pref_reg)
+
+# Since estimates should be positive, flipping the eigenvectors for Z1 and Z2
+
+out4  <- out3
+
+out4[,1] <- (-1)*out4[,1]
+out4[,2] <- (-1)*out4[,2]
+
+z = x %*% out4
+
+pref_reg = lm(y ~ z)
+
+summary(pref_reg)
+
+# eliminating Z4 as is it not significant
+
+out4 <- out4[,1:3]
+
+out4
+```
+\
+# Names\
+\
+Z1 - Premium \
+Z2 - Unreliable \
+Z3 - Value for Money \
+\
+\
+**4. Explain iso-preference line and its difference from the regression line**\
+\
+All brands on the iso-preference line have the same preference i.e. all brands satisfy the preference.\
+In case of regression line, the all brands on the same line won't have the same outcome. It will depend on y-axis.\
+\
+**5. Explain what is an ideal vector and why it indicates the direction of increasing preferences?**\
+\
+Ideal vector is the line perpendicular to iso-preference line. It indicates the direction in which the brand should move to differentiate itself from it's nearest competitors.\
+Assuming that all betas are positive, brands to the right of iso-preference line are more preferred and ideal vector is perpendicular to the line so it indicates the direction of increasing preferences.
+\
+**6. Compute the angles of iso-preference line and ideal vector arrow**\
+\
+# Brand Maps\
+\
+# Z1, Z2\
+```{r}
+Z1 = z[,1]
+Z2 = z[,2]
+z.out = cbind(Z1, Z2)
+rownames(z.out) = cars[,1]
+
+plot(Z1, Z2, main = "Brands in Z1 and Z2 space", xlab = "Benefit Z1 - Premium", ylab = "Benefit Z2 - Unreliable", col = "lightblue", pch = 19, cex = 2) # Brand Map in Z1-Z2 space
+text(z.out, labels = row.names(z.out), font = 2, cex = 0.5, pos = 1)						# labeling brands
+```
+\
+# Z2, Z3
+```{r}
+Z3 = z[,3]
+z1.out = cbind(Z2, Z3)
+rownames(z1.out) = cars[,1]
+
+plot(Z2, Z3, main = "Brands in Z2 and Z3 space", xlab = "Benefit Z2 - Unreliable", ylab = "Benefit Z3 - Value for money", col = "lightblue", pch = 19, cex = 2) # Brand Map in Z2-Z3 space
+text(z1.out, labels = row.names(z1.out), font = 2, cex = 0.5, pos = 1)						# labeling brands
+```
+\
+# Z1, Z3
+```{r}
+z2.out = cbind(Z1, Z3)
+rownames(z2.out) = cars[,1]
+
+plot(Z1, Z3, main = "Brands in Z1 and Z3 space", xlab = "Benefit Z1 - Premium", ylab = "Benefit Z3 - Value for money", col = "lightblue", pch = 19, cex = 2) # Brand Map in Z1-Z2 space
+text(z2.out, labels = row.names(z2.out), font = 2, cex = 0.5, pos = 1)						# labeling brands
+
+# Slopes of iso-preference and ideal vector
+```
+\
+# For Z1 and Z2\
+```{r}
+b1 = as.vector(coef(pref_reg)[2])
+b2 = as.vector(coef(pref_reg)[3])
+slope.iso.preference = - b1/b2					
+slope.ideal.vector = b2/b1
+
+# Angles of iso-preference and ideal vector
+
+angle.iso.preference = atan(slope.iso.preference)*180/pi	
+angle.ideal.vector = atan(slope.ideal.vector)*180/pi
+
+print(paste("angle.iso.preference : ", angle.iso.preference))
+print(paste("angle.ideal.vector : ", angle.ideal.vector))
+
+```
+\
+# For Z2 and Z3\
+```{r}
+b3 = as.vector(coef(pref_reg)[4])
+slope.iso.preference = - b2/b3					
+slope.ideal.vector = b3/b2
+
+# Angles of iso-preference and ideal vector
+
+angle.iso.preference = atan(slope.iso.preference)*180/pi	
+angle.ideal.vector = atan(slope.ideal.vector)*180/pi
+
+print(paste("angle.iso.preference : ", angle.iso.preference))
+print(paste("angle.ideal.vector : ", angle.ideal.vector))
+```
+\
+# For Z1 and Z3\
+```{r}
+
+slope.iso.preference = - b1/b3					
+slope.ideal.vector = b3/b1
+
+# Angles of iso-preference and ideal vector
+
+angle.iso.preference = atan(slope.iso.preference)*180/pi	
+angle.ideal.vector = atan(slope.ideal.vector)*180/pi
+
+print(paste("angle.iso.preference : ", angle.iso.preference))
+print(paste("angle.ideal.vector : ", angle.ideal.vector))
+```
+\
+**7. Find 95% confidence interval for the angle of the ideal vector. Use data bootstrap method we learnt in Class 3.**\
+\
+```{r}
+angle <- list()
+r <- nrow(data)
+
+set.seed(876)
+
+# Do Data Bootstrap 1000 times to get 95% CI for R^2
+for(i in 1:1000) {
+	tryCatch({
+	          
+	          data.star <- data[sample(r, r, replace = T),]		# create (y*, x*) by resampling rows in original data matrix
+          	ystar <- data.star[,1]
+          	xstar <- data.star[,2:16]
+          	cor_mat = cor(xstar)
+            o1 <-  eigen(cor_mat)	# eigen decomposition of correlation matrix
+            va <-  o1$values			# eigenvalues
+            ve <-  o1$vectors
+            ego <- va[va > 1]							# eigenvalues > 1
+            n <- nrow(as.matrix(ego))
+            o2 <- ve[,1:n]							# eigenvectors associated with the retained factors
+            o3 <- ifelse(abs(o2) < 0.3, 0, o2)		# ignore small values < 0.3
+            rownames(o3) <- c("Attractive", "Quiet", "Unreliable", "Poorly.Built", "Interesting", "Sporty", "Uncomfortable", "Roomy", 
+                                "Easy.Service", "Prestige", "Common", "Economical", "Successful", "AvantGarde", "Poor.Value")
+            zstar = xstar %*% o3			# Component Scores; coordinates of the brands in the map
+            pref_reg_star = lm(ystar ~ zstar)		# Preference Regression to estimate how benefits drive overall preferences = f(benefits)
+            
+            # flipping o3 if coefficients are negative
+            for (j in 2:length(coef(pref_reg_star))){
+              if(coef(pref_reg_star)[j] < 0){
+                o3[,j-1] = (-1)*o3[,j-1]
+              }
+            }
+            # new model
+            zstar = xstar %*% o3			
+            pref_reg_star = lm(ystar ~ zstar)	
+            
+            # finding significant coefficients
+            cf <- data.frame(summary(pref_reg_star)$coef) # collecting coefficients
+            cf <- cf[-1,] # removing intercept
+            a <- cf[cf[,4] <= .05, 1] # taking significant coefficients only
+            
+            # making sure that there are more than 1 significant variable
+            if(length(a) > 1){
+              b <- t(combn(a, 2)) # creating pairs
+            	c <- c()
+            	
+            	# calculating angle
+            	for (k in 1:nrow(b)) {
+            	   c <- c(c, atan(b[k,2]/b[k,1])*180/pi)
+            	}
+            	
+            	# saving the output
+            	angle[[i]] <- c
+            }  
+	  }, error=function(e){})
+}
+
+# removing nulls and converting it to data frame
+
+df <- plyr::ldply(angle, rbind)
+
+df <- df[,colSums(is.na(df))<nrow(df)]
+```
+\
+# printing the confidence intervals for each pair of signficant betas.\
+```{r}
+for (i in 1:ncol(df)){
+  print(paste("For pair : ", i))
+  print(quantile(df[,i], probs = c(0.025, 0.975), na.rm = TRUE))
+  print(paste("mean : ", mean(df[,i], na.rm = TRUE)))
+}
+
+```
+\
+**8. Recommend to Infinity's managers what they should do to improve their product design**\
+We got three brand maps -\
+1. Premium vs unreliable - In this brand map, BMW is infinity's close competitor - with ideal vector at 22 degrees which leans towards premium feature.\
+Thus, infinity should work on premium cars which are attractive and well built.\
+2. unreliable vs value for money - In this brand map, Mercury, BMW, Eagle are infinity's close competitor - with ideal vector at 58 degrees which leans towards value for money feature.\
+Thus infinity should focus on economical and good value cars.\
+3. Premium vs value for money - In this brand map, BMW is infinity's close competitor - with ideal vector at 33 degrees which leans towards premium feature.\
+Thus, infinity should work on premium cars which are attractive and well built.\
